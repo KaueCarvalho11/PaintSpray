@@ -57,25 +57,32 @@ public class ClienteRepository extends BaseRepository<Cliente> {
      * Ao deletar um cliente → primeiro apaga todos os veículos
      */
     @Override
-    public void delete(String idCliente) throws SQLException {
+public void delete(String idCliente) throws SQLException {
 
-        executeTransaction(connection -> {
+    executeTransaction(connection -> {
 
-            // 1. Apagar todos os veículos associados ao cliente
-            String deleteVeiculos = "DELETE FROM veiculos WHERE id_cliente = ?";
-            try (PreparedStatement stmt = connection.prepareStatement(deleteVeiculos)) {
-                stmt.setString(1, idCliente);
-                stmt.executeUpdate();
-            }
+        // 1. Apagar todos os serviços associados aos veículos deste cliente
+        String deleteServicos = "DELETE FROM servicos WHERE id_veiculo IN (SELECT id FROM veiculos WHERE id_cliente = ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(deleteServicos)) {
+            stmt.setString(1, idCliente);
+            stmt.executeUpdate();
+        }
 
-            // 2. Apagar o cliente
-            String deleteCliente = "DELETE FROM clientes WHERE id = ?";
-            try (PreparedStatement stmt = connection.prepareStatement(deleteCliente)) {
-                stmt.setString(1, idCliente);
-                stmt.executeUpdate();
-            }
-        });
-    }
+        // 2. Apagar todos os veículos associados ao cliente
+        String deleteVeiculos = "DELETE FROM veiculos WHERE id_cliente = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(deleteVeiculos)) {
+            stmt.setString(1, idCliente);
+            stmt.executeUpdate();
+        }
+
+        // 3. Apagar o cliente
+        String deleteCliente = "DELETE FROM clientes WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(deleteCliente)) {
+            stmt.setString(1, idCliente);
+            stmt.executeUpdate();
+        }
+    });
+}
 
     /**
      * Busca um cliente pelo ID

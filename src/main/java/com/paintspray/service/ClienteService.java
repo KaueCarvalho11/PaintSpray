@@ -156,24 +156,17 @@ public class ClienteService {
                 cliente.getEndereco(), cliente.getNumeroTelefone());
     }
 
-    /**
-     * Remove um cliente do sistema.
-     */
-    public void removerCliente(String id) throws SQLException, IllegalArgumentException, IllegalStateException {
-        // Garante que o cliente existe
-        buscarClientePorId(id);
 
-        // Esta verificação é uma regra de negócio CRÍTICA para evitar a exclusão de
-        // clientes com veículos ativos.
+   /**
+ * Remove um cliente do sistema (exclusão em cascata feita no repositório).
+ */
+public void removerCliente(String id) throws SQLException, IllegalArgumentException {
+    // Garante que o cliente existe
+    buscarClientePorId(id);
 
-        int quantidadeVeiculos = veiculoRepository.countByClienteId(id);
-        if (quantidadeVeiculos > 0) {
-            throw new IllegalStateException(
-                    "Não é possível remover cliente que possui " + quantidadeVeiculos + " veículo(s) cadastrado(s).");
-        }
-
-        repository.delete(id);
-    }
+    // O repositório faz a exclusão em cascata (serviços -> veículos -> cliente)
+    repository.delete(id);
+}
 
     /**
      * Retorna uma lista de todos os serviços solicitados por um cliente específico.
