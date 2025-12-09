@@ -131,8 +131,12 @@ Este backlog foi priorizado com foco nas métricas de sucesso do projeto: reduzi
 Desenvolvido para a disciplina de Engenharia de Software - UFERSA 2025.2
 
 ## 👥 Componentes
-- Antônio Erick Silveira 
-- Francisco Adrian Vinicius Chaves Sampaio
+| Integrante | Papel | Resumo das Atividades |
+| :--- | :--- | :--- |
+| **Kauê Valentim** | Product Owner / Dev | Infraestrutura, diagramas técnicos e migração de dados. |
+| **Antonio Erick** | Backend Developer | Modelagem de dados (DER), persistência e refatoração do Core. |
+| **Jean Richardson** | Analista de Requisitos / Dev | Definição de requisitos (RF/RNF) e lógica de regras de negócio. |
+| **Francisco Adrian** | Frontend / UI Designer | Design de telas, experiência do usuário e construção do Dashboard. |
 
 ## 📝 Licença
 
