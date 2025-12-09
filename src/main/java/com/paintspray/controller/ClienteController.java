@@ -319,38 +319,161 @@ public class ClienteController {
         dialog.getDialogPane().getButtonTypes().addAll(salvarButton, ButtonType.CANCEL);
 
         // Formulário
-        VBox form = new VBox(10);
+        VBox form = new VBox(8);
         form.setPadding(new Insets(20));
+        form.setPrefWidth(400);
 
+        // Campos
         TextField idField = new TextField(cliente != null ? cliente.getId() : "");
-        idField.setPromptText("CPF ou ID");
-        idField.setDisable(cliente != null); // ID não editável
+        idField.setPromptText("CPF (apenas números, 11 dígitos)");
+        idField.setDisable(cliente != null);
+        Label idError = new Label();
+        idError.setStyle("-fx-text-fill: #E74C3C; -fx-font-size: 11px;");
+        idError.setVisible(false);
+        idError.setManaged(false);
 
         TextField nomeField = new TextField(cliente != null ? cliente.getNome() : "");
-        nomeField.setPromptText("Nome completo");
+        nomeField.setPromptText("Nome completo (apenas letras)");
+        Label nomeError = new Label();
+        nomeError.setStyle("-fx-text-fill: #E74C3C; -fx-font-size: 11px;");
+        nomeError.setVisible(false);
+        nomeError.setManaged(false);
 
         TextField enderecoField = new TextField(cliente != null ? cliente.getEndereco() : "");
-        enderecoField.setPromptText("Endereço");
+        enderecoField.setPromptText("Endereço completo");
+        Label enderecoError = new Label();
+        enderecoError.setStyle("-fx-text-fill: #E74C3C; -fx-font-size: 11px;");
+        enderecoError.setVisible(false);
+        enderecoError.setManaged(false);
 
         TextField telefoneField = new TextField(cliente != null ? cliente.getNumeroTelefone() : "");
-        telefoneField.setPromptText("Telefone");
+        telefoneField.setPromptText("Telefone (8-15 dígitos)");
+        Label telefoneError = new Label();
+        telefoneError.setStyle("-fx-text-fill: #E74C3C; -fx-font-size: 11px;");
+        telefoneError.setVisible(false);
+        telefoneError.setManaged(false);
+
+        // Validação em tempo real
+        Runnable validarCampos = () -> {
+            boolean valido = true;
+
+            // Validar ID/CPF
+            String id = idField.getText().trim();
+            if (cliente == null) { // Só valida ID em novo cliente
+                if (id.isEmpty()) {
+                    idError.setText("⚠ CPF é obrigatório");
+                    idError.setVisible(true);
+                    idError.setManaged(true);
+                    idField.setStyle("-fx-border-color: #E74C3C;");
+                    valido = false;
+                } else if (!id.matches("^[0-9]{11}$")) {
+                    idError.setText("⚠ CPF deve ter exatamente 11 dígitos numéricos");
+                    idError.setVisible(true);
+                    idError.setManaged(true);
+                    idField.setStyle("-fx-border-color: #E74C3C;");
+                    valido = false;
+                } else {
+                    idError.setVisible(false);
+                    idError.setManaged(false);
+                    idField.setStyle("-fx-border-color: #27AE60;");
+                }
+            }
+
+            // Validar Nome
+            String nome = nomeField.getText().trim();
+            if (nome.isEmpty()) {
+                nomeError.setText("⚠ Nome é obrigatório");
+                nomeError.setVisible(true);
+                nomeError.setManaged(true);
+                nomeField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else if (!nome.matches("^[A-Za-zÀ-ÖØ-öø-ÿ ]+$")) {
+                nomeError.setText("⚠ Nome deve conter apenas letras e espaços");
+                nomeError.setVisible(true);
+                nomeError.setManaged(true);
+                nomeField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else if (nome.contains("  ")) {
+                nomeError.setText("⚠ Nome não pode ter espaços duplos");
+                nomeError.setVisible(true);
+                nomeError.setManaged(true);
+                nomeField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else {
+                nomeError.setVisible(false);
+                nomeError.setManaged(false);
+                nomeField.setStyle("-fx-border-color: #27AE60;");
+            }
+
+            // Validar Endereço
+            String endereco = enderecoField.getText().trim();
+            if (endereco.isEmpty()) {
+                enderecoError.setText("⚠ Endereço é obrigatório");
+                enderecoError.setVisible(true);
+                enderecoError.setManaged(true);
+                enderecoField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else if (endereco.length() < 5) {
+                enderecoError.setText("⚠ Endereço muito curto (mínimo 5 caracteres)");
+                enderecoError.setVisible(true);
+                enderecoError.setManaged(true);
+                enderecoField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else {
+                enderecoError.setVisible(false);
+                enderecoError.setManaged(false);
+                enderecoField.setStyle("-fx-border-color: #27AE60;");
+            }
+
+            // Validar Telefone
+            String telefone = telefoneField.getText().replaceAll("[^0-9]", "");
+            if (telefoneField.getText().trim().isEmpty()) {
+                telefoneError.setText("⚠ Telefone é obrigatório");
+                telefoneError.setVisible(true);
+                telefoneError.setManaged(true);
+                telefoneField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else if (telefone.length() < 8 || telefone.length() > 15) {
+                telefoneError.setText("⚠ Telefone deve ter entre 8 e 15 dígitos");
+                telefoneError.setVisible(true);
+                telefoneError.setManaged(true);
+                telefoneField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else {
+                telefoneError.setVisible(false);
+                telefoneError.setManaged(false);
+                telefoneField.setStyle("-fx-border-color: #27AE60;");
+            }
+
+            // Habilita/desabilita botão Salvar
+            dialog.getDialogPane().lookupButton(salvarButton).setDisable(!valido);
+        };
+
+        // Listeners
+        idField.textProperty().addListener((obs, old, newVal) -> validarCampos.run());
+        nomeField.textProperty().addListener((obs, old, newVal) -> validarCampos.run());
+        enderecoField.textProperty().addListener((obs, old, newVal) -> validarCampos.run());
+        telefoneField.textProperty().addListener((obs, old, newVal) -> validarCampos.run());
 
         form.getChildren().addAll(
-                new Label("ID/CPF:"), idField,
-                new Label("Nome:"), nomeField,
-                new Label("Endereço:"), enderecoField,
-                new Label("Telefone:"), telefoneField);
+                new Label("CPF:"), idField, idError,
+                new Label("Nome:"), nomeField, nomeError,
+                new Label("Endereço:"), enderecoField, enderecoError,
+                new Label("Telefone:"), telefoneField, telefoneError);
 
         dialog.getDialogPane().setContent(form);
+
+        // Validação inicial
+        dialog.setOnShowing(e -> validarCampos.run());
 
         // Converter resultado
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == salvarButton) {
                 return new Cliente(
-                        idField.getText(),
-                        nomeField.getText(),
-                        enderecoField.getText(),
-                        telefoneField.getText());
+                        idField.getText().trim(),
+                        nomeField.getText().trim(),
+                        enderecoField.getText().trim(),
+                        telefoneField.getText().trim());
             }
             return null;
         });
@@ -367,33 +490,133 @@ public class ClienteController {
         dialog.getDialogPane().getButtonTypes().addAll(salvarButton, ButtonType.CANCEL);
 
         // Formulário
-        VBox form = new VBox(10);
+        VBox form = new VBox(8);
         form.setPadding(new Insets(20));
+        form.setPrefWidth(350);
 
         TextField modeloField = new TextField(veiculo != null ? veiculo.getModelo() : "");
-        modeloField.setPromptText("Modelo da moto");
+        modeloField.setPromptText("Ex: Honda CG 160, NRG-500");
+        Label modeloError = new Label();
+        modeloError.setStyle("-fx-text-fill: #E74C3C; -fx-font-size: 11px;");
+        modeloError.setVisible(false);
+        modeloError.setManaged(false);
 
         TextField corField = new TextField(veiculo != null ? veiculo.getCor() : "");
-        corField.setPromptText("Cor");
+        corField.setPromptText("Ex: Vermelho, Preto");
+        Label corError = new Label();
+        corError.setStyle("-fx-text-fill: #E74C3C; -fx-font-size: 11px;");
+        corError.setVisible(false);
+        corError.setManaged(false);
 
         TextField anoField = new TextField(veiculo != null ? String.valueOf(veiculo.getAnoFabricacao()) : "");
-        anoField.setPromptText("Ano de fabricação");
+        anoField.setPromptText("Ex: 2020");
+        Label anoError = new Label();
+        anoError.setStyle("-fx-text-fill: #E74C3C; -fx-font-size: 11px;");
+        anoError.setVisible(false);
+        anoError.setManaged(false);
+
+        int anoAtual = java.time.Year.now().getValue();
+
+        // Validação em tempo real
+        Runnable validarCampos = () -> {
+            boolean valido = true;
+
+            // Validar Modelo
+            String modelo = modeloField.getText().trim();
+            if (modelo.isEmpty()) {
+                modeloError.setText("⚠ Modelo é obrigatório");
+                modeloError.setVisible(true);
+                modeloError.setManaged(true);
+                modeloField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else if (!modelo.matches("^[A-Za-zÀ-ÖØ-öø-ÿ0-9 -]+$")) {
+                modeloError.setText("⚠ Modelo contém caracteres inválidos");
+                modeloError.setVisible(true);
+                modeloError.setManaged(true);
+                modeloField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else {
+                modeloError.setVisible(false);
+                modeloError.setManaged(false);
+                modeloField.setStyle("-fx-border-color: #27AE60;");
+            }
+
+            // Validar Cor
+            String cor = corField.getText().trim();
+            if (cor.isEmpty()) {
+                corError.setText("⚠ Cor é obrigatória");
+                corError.setVisible(true);
+                corError.setManaged(true);
+                corField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else if (!cor.matches("^[A-Za-zÀ-ÖØ-öø-ÿ ]+$")) {
+                corError.setText("⚠ Cor deve conter apenas letras");
+                corError.setVisible(true);
+                corError.setManaged(true);
+                corField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else {
+                corError.setVisible(false);
+                corError.setManaged(false);
+                corField.setStyle("-fx-border-color: #27AE60;");
+            }
+
+            // Validar Ano
+            String anoStr = anoField.getText().trim();
+            if (anoStr.isEmpty()) {
+                anoError.setText("⚠ Ano é obrigatório");
+                anoError.setVisible(true);
+                anoError.setManaged(true);
+                anoField.setStyle("-fx-border-color: #E74C3C;");
+                valido = false;
+            } else {
+                try {
+                    int ano = Integer.parseInt(anoStr);
+                    if (ano < 1900 || ano > anoAtual) {
+                        anoError.setText("⚠ Ano deve ser entre 1900 e " + anoAtual);
+                        anoError.setVisible(true);
+                        anoError.setManaged(true);
+                        anoField.setStyle("-fx-border-color: #E74C3C;");
+                        valido = false;
+                    } else {
+                        anoError.setVisible(false);
+                        anoError.setManaged(false);
+                        anoField.setStyle("-fx-border-color: #27AE60;");
+                    }
+                } catch (NumberFormatException e) {
+                    anoError.setText("⚠ Ano deve ser um número válido");
+                    anoError.setVisible(true);
+                    anoError.setManaged(true);
+                    anoField.setStyle("-fx-border-color: #E74C3C;");
+                    valido = false;
+                }
+            }
+
+            dialog.getDialogPane().lookupButton(salvarButton).setDisable(!valido);
+        };
+
+        // Listeners
+        modeloField.textProperty().addListener((obs, old, newVal) -> validarCampos.run());
+        corField.textProperty().addListener((obs, old, newVal) -> validarCampos.run());
+        anoField.textProperty().addListener((obs, old, newVal) -> validarCampos.run());
 
         form.getChildren().addAll(
-                new Label("Modelo:"), modeloField,
-                new Label("Cor:"), corField,
-                new Label("Ano:"), anoField);
+                new Label("Modelo:"), modeloField, modeloError,
+                new Label("Cor:"), corField, corError,
+                new Label("Ano:"), anoField, anoError);
 
         dialog.getDialogPane().setContent(form);
+
+        dialog.setOnShowing(e -> validarCampos.run());
 
         // Converter resultado
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == salvarButton) {
                 return new Veiculo(
                         veiculo != null ? veiculo.getId() : 0,
-                        modeloField.getText(),
-                        corField.getText(),
-                        Integer.parseInt(anoField.getText()),
+                        modeloField.getText().trim(),
+                        corField.getText().trim(),
+                        Integer.parseInt(anoField.getText().trim()),
                         clienteId);
             }
             return null;

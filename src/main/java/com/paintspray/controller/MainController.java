@@ -3,6 +3,7 @@ package com.paintspray.controller;
 import com.paintspray.MainApplication;
 import com.paintspray.model.Servico;
 import com.paintspray.service.ServicoService;
+import com.paintspray.service.ClienteService;
 import com.paintspray.enums.StatusServico;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -47,6 +48,7 @@ public class MainController {
     private Label welcomeLabel;
 
     private final ServicoService servicoService = new ServicoService();
+    private final ClienteService clienteService = new ClienteService();
 
     @FXML
     private void initialize() {
@@ -432,12 +434,22 @@ public class MainController {
 
         // Informações
         VBox info = new VBox(10);
+        
+        // Busca o nome do cliente pelo veículo
+        String nomeCliente = "N/A";
+        try {
+            nomeCliente = clienteService.buscarClientePorId(servico.getVeiculo().getIdCliente()).getNome();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         info.getChildren().addAll(
                 criarInfoRow("Tipo:", servico.getTipo().getDescricao()),
                 criarInfoRow("Descrição:", servico.getDescricao()),
                 criarInfoRow("Preço:", String.format("R$ %.2f", servico.getPreco())),
                 criarInfoRow("Pagamento:", servico.getFormaPagamento().getDescricao()),
                 new Separator(),
+                criarInfoRow("Cliente:", nomeCliente),
                 criarInfoRow("Veículo:", String.format("%s - %s (%d)",
                         servico.getVeiculo().getModelo(),
                         servico.getVeiculo().getCor(),

@@ -58,6 +58,12 @@
                 </graphic>
             </Button>
             
+            <Button text="Aguardar Pagamento" onAction="#handleAguardarPagamento" styleClass="button-warning">
+                <graphic>
+                    <FontIcon iconLiteral="mdi2c-cash" iconSize="16"/>
+                </graphic>
+            </Button>
+            
             <Button text="Concluir" onAction="#handleConcluir" styleClass="button-success">
                 <graphic>
                     <FontIcon iconLiteral="mdi2c-check" iconSize="16"/>

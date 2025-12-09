@@ -96,7 +96,6 @@
                     </HBox>
                     <Label text="• Status inicial: PENDENTE" style="-fx-text-fill: #555;"/>
                     <Label text="• Você poderá atualizar o status no Dashboard" style="-fx-text-fill: #555;"/>
-                    <Label text="• O cliente será notificado quando finalizado" style="-fx-text-fill: #555;"/>
                 </VBox>
             </GridPane>
 

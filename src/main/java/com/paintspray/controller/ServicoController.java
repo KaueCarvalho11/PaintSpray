@@ -211,6 +211,28 @@ public class ServicoController {
     }
 
     @FXML
+    private void handleAguardarPagamento() {
+        Servico selecionado = servicoTable.getSelectionModel().getSelectedItem();
+        if (selecionado == null) {
+            showAlert(Alert.AlertType.WARNING, "Atenção", "Selecione um serviço.");
+            return;
+        }
+
+        if (selecionado.getStatus() != StatusServico.EM_ANDAMENTO) {
+            showAlert(Alert.AlertType.WARNING, "Atenção", "Apenas serviços em andamento podem aguardar pagamento.");
+            return;
+        }
+
+        try {
+            servicoService.atualizarStatusServico(selecionado.getIdServico(), StatusServico.AGUARDANDO_PAGAMENTO);
+            carregarServicos();
+            showAlert(Alert.AlertType.INFORMATION, "Sucesso", "Serviço aguardando pagamento!");
+        } catch (SQLException | IllegalStateException e) {
+            showAlert(Alert.AlertType.ERROR, "Erro", e.getMessage());
+        }
+    }
+
+    @FXML
     private void handleConcluir() {
         Servico selecionado = servicoTable.getSelectionModel().getSelectedItem();
         if (selecionado == null) {
